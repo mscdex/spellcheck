@@ -1,4 +1,3 @@
-
 Description
 ===========
 
@@ -38,7 +37,7 @@ Examples
   });
 
   // output:
-  // Word is spelled incorrectly. Suggestions: chain,sin,saint,satin,stain,slain,swain,rain,sail,lain,said,gain,main,spin,pain
+  // Word not recognized. Suggestions: chain,sin,saint,satin,stain,slain,swain,rain,sail,lain,said,gain,main,spin,pain
 ```
 
 
