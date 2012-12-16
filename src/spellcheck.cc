@@ -10,7 +10,7 @@ struct Baton {
     uv_work_t request;
     Persistent<Function> callback;
 
-    const char *word;
+    char *word;
 
     // Hunspell handle
     Hunspell *spell;
@@ -94,8 +94,10 @@ class SpellCheck : public ObjectWrap {
       baton->word = strdup((const char*)*str);
       baton->spell = obj->spell;
 
-      int status = uv_queue_work(uv_default_loop(), &baton->request,
-                                 SpellCheck::CheckWork, SpellCheck::CheckAfter);
+      int status = uv_queue_work(uv_default_loop(),
+                                 &baton->request,
+                                 SpellCheck::CheckWork,
+                                 (uv_after_work_cb)SpellCheck::CheckAfter);
       assert(status == 0);
 
       return Undefined();
@@ -138,6 +140,7 @@ class SpellCheck : public ObjectWrap {
       if (try_catch.HasCaught())
         FatalException(try_catch);
 
+      free(baton->word);
       baton->callback.Dispose();
       delete baton;
     }

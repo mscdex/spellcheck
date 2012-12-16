@@ -3,7 +3,7 @@
     {
       'target_name': 'spellcheck',
       'sources': [
-        'spellcheck.cc',
+        'src/spellcheck.cc',
       ],
       'cflags': [ '-O3' ],
       'dependencies': [
