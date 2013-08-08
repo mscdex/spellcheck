@@ -1,4 +1,5 @@
 #include <node.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "hunspell.hxx"
