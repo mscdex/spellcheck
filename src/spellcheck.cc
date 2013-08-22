@@ -127,8 +127,7 @@ class SpellCheck : public ObjectWrap {
       Local<Value> argv[argc];
       argv[0] = Local<Value>::New(Null());
       argv[1] = Local<Value>::New(Boolean::New(baton->isCorrect));
-
-      if (baton->numSuggest > 0) {
+      if (baton->numSuggest > 0 && baton->suggestions != NULL) {
         Local<Array> suggestions = Array::New(baton->numSuggest);
         for (int i = 0; i < baton->numSuggest; ++i)
           suggestions->Set(i, String::New(baton->suggestions[i]));
