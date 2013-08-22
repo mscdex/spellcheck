@@ -1,5 +1,5 @@
 { "name": "spellcheck",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Brian White <mscdex@mscdex.net>",
   "description": "An async hunspell binding for node.js",
   "main": "./index",
