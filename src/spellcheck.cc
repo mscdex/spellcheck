@@ -94,6 +94,8 @@ class SpellCheck : public ObjectWrap {
       baton->callback = Persistent<Function>::New(callback);
       baton->word = strdup((const char*)*str);
       baton->spell = obj->spell;
+      baton->numSuggest = 0;
+      baton->suggestions = NULL;
 
       int status = uv_queue_work(uv_default_loop(),
                                  &baton->request,
