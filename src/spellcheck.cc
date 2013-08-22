@@ -123,7 +123,7 @@ class SpellCheck : public ObjectWrap {
       HandleScope scope;
       Baton* baton = static_cast<Baton*>(req->data);
 
-      const unsigned argc = 3;
+      const unsigned int argc = 3;
       Local<Value> argv[argc];
       argv[0] = Local<Value>::New(Null());
       argv[1] = Local<Value>::New(Boolean::New(baton->isCorrect));
