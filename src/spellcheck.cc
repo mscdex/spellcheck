@@ -132,17 +132,17 @@ class SpellCheck : public ObjectWrap {
         for (int i = 0; i < baton->numSuggest; ++i)
           suggestions->Set(i, String::New(baton->suggestions[i]));
         baton->spell->free_list(&(baton->suggestions), baton->numSuggest);
-        baton->suggestions = NULL;
         argv[2] = suggestions;
       } else
         argv[2] = Local<Value>::New(Undefined());
+
+      free(baton->word);
 
       TryCatch try_catch;
       baton->callback->Call(Context::GetCurrent()->Global(), argc, argv);
       if (try_catch.HasCaught())
         FatalException(try_catch);
 
-      free(baton->word);
       baton->callback.Dispose();
       delete baton;
     }
