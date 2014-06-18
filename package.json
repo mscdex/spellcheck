@@ -1,10 +1,35 @@
-{ "name": "spellcheck",
+{
+  "name": "spellcheck",
   "version": "0.0.4",
   "author": "Brian White <mscdex@mscdex.net>",
   "description": "An async hunspell binding for node.js",
   "main": "./index",
-  "engines": { "node" : ">=0.6.0" },
-  "keywords": [ "spell", "spellcheck", "hunspell", "spelling" ],
-  "licenses": [ { "type": "MIT", "url": "http://github.com/mscdex/spellcheck/raw/master/LICENSE" } ],
-  "repository" : { "type": "git", "url": "http://github.com/mscdex/spellcheck.git" }
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "keywords": [
+    "spell",
+    "spellcheck",
+    "hunspell",
+    "spelling"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/mscdex/spellcheck/raw/master/LICENSE"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/mscdex/spellcheck.git"
+  },
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/mscdex/spellcheck/issues"
+  },
+  "homepage": "https://github.com/mscdex/spellcheck",
+  "license": "MIT"
 }
