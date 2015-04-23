@@ -6,5 +6,6 @@
   "engines": { "node" : ">=0.6.0" },
   "keywords": [ "spell", "spellcheck", "hunspell", "spelling" ],
   "licenses": [ { "type": "MIT", "url": "http://github.com/mscdex/spellcheck/raw/master/LICENSE" } ],
-  "repository" : { "type": "git", "url": "http://github.com/mscdex/spellcheck.git" }
+  "repository" : { "type": "git", "url": "http://github.com/mscdex/spellcheck.git" },
+  "dependencies": { "nan": "^1.7.0" }
 }
