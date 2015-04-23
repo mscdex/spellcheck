@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "nan.h"
 #include "hunspell.hxx"
 
 using namespace node;
@@ -9,7 +10,7 @@ using namespace v8;
 
 struct Baton {
     uv_work_t request;
-    Persistent<Function> callback;
+    NanCallback *callback;
 
     char *word;
 
@@ -21,7 +22,7 @@ struct Baton {
     int numSuggest;
 };
 
-static Persistent<FunctionTemplate> constructor;
+static Persistent<Function> constructor;
 
 class SpellCheck : public ObjectWrap {
   public:
@@ -36,29 +37,23 @@ class SpellCheck : public ObjectWrap {
       spell = NULL;
     }
 
-    static Handle<Value> New(const Arguments& args) {
-      HandleScope scope;
+    static NAN_METHOD(New) {
+      NanScope();
       const char *affpath;
       const char *dpath;
 
       if (!args.IsConstructCall()) {
-        return ThrowException(Exception::TypeError(
-          String::New("Use `new` to create instances of this object.")
-        ));
+        return NanThrowError(
+	        "Use `new` to create instances of this object.");
       }
 
       if (args.Length() != 2) {
-        return ThrowException(Exception::TypeError(
-          String::New("Expecting two arguments")
-        ));
+        return NanThrowError("Expecting two arguments");
       } else if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-          String::New("First argument must be a string")
-        ));
+        return NanThrowError("First argument must be a string");
       } else if (!args[1]->IsString()) {
-        return ThrowException(Exception::TypeError(
-          String::New("Second argument must be a string")
-        ));
+        return NanThrowError(
+          "Second argument must be a string");
       }
 
       String::Utf8Value affpathstr(args[0]->ToString());
@@ -69,29 +64,28 @@ class SpellCheck : public ObjectWrap {
       SpellCheck* obj = new SpellCheck(affpath, dpath);
       obj->Wrap(args.This());
 
-      return args.This();
+      NanReturnValue(args.This());
     }
 
-    static Handle<Value> Check(const Arguments& args) {
-      HandleScope scope;
+    static NAN_METHOD(Check) {
+      NanScope();
       SpellCheck* obj = ObjectWrap::Unwrap<SpellCheck>(args.This());
 
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-            String::New("First argument must be a string")));
+        return NanThrowError("First argument must be a string");
       }
       if (!args[1]->IsFunction()) {
-        return ThrowException(Exception::TypeError(
-            String::New("Second argument must be a callback function")));
+        return NanThrowError("Second argument must be a callback function");
       }
 
-      Local<Function> callback = Local<Function>::Cast(args[1]);
+      Local<Function> callbackHandle = args[1].As<Function>();
+      NanCallback *callback = new NanCallback(callbackHandle);
 
       String::Utf8Value str(args[0]->ToString());
 
       Baton* baton = new Baton();
       baton->request.data = baton;
-      baton->callback = Persistent<Function>::New(callback);
+      baton->callback = callback;
       baton->word = strdup((const char*)*str);
       baton->spell = obj->spell;
       baton->numSuggest = 0;
@@ -103,7 +97,7 @@ class SpellCheck : public ObjectWrap {
                                  (uv_after_work_cb)SpellCheck::CheckAfter);
       assert(status == 0);
 
-      return Undefined();
+      NanReturnValue(NanUndefined());
     }
 
     static void CheckWork(uv_work_t* req) {
@@ -120,53 +114,52 @@ class SpellCheck : public ObjectWrap {
     }
 
     static void CheckAfter(uv_work_t* req) {
-      HandleScope scope;
+      NanScope();
       Baton* baton = static_cast<Baton*>(req->data);
 
       const unsigned int argc = 3;
       Local<Value> argv[argc];
-      argv[0] = Local<Value>::New(Null());
-      argv[1] = Local<Value>::New(Boolean::New(baton->isCorrect));
+      argv[0] = NanNull();
+      argv[1] = NanNew<Boolean>(baton->isCorrect);
       if (baton->numSuggest > 0 && baton->suggestions != NULL) {
-        Local<Array> suggestions = Array::New(baton->numSuggest);
+        Local<Array> suggestions = NanNew<Array>(baton->numSuggest);
         for (int i = 0; i < baton->numSuggest; ++i)
-          suggestions->Set(i, String::New(baton->suggestions[i]));
+          suggestions->Set(i, NanNew(baton->suggestions[i]));
         baton->spell->free_list(&(baton->suggestions), baton->numSuggest);
         argv[2] = suggestions;
       } else
-        argv[2] = Local<Value>::New(Undefined());
+        argv[2] = NanUndefined();
 
       free(baton->word);
 
       TryCatch try_catch;
-      baton->callback->Call(Context::GetCurrent()->Global(), argc, argv);
+      baton->callback->Call(argc, argv);
       if (try_catch.HasCaught())
         FatalException(try_catch);
 
-      baton->callback.Dispose();
+      delete baton->callback;
       delete baton;
     }
 
-    static void Initialize(Handle<Object> target) {
-      HandleScope scope;
+    static void Initialize(Handle<Object> exports) {
+      NanScope();
 
-      Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-      Local<String> name = String::NewSymbol("SpellCheck");
+      Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
 
-      constructor = Persistent<FunctionTemplate>::New(tpl);
-      constructor->InstanceTemplate()->SetInternalFieldCount(1);
-      constructor->SetClassName(name);
+      tpl->InstanceTemplate()->SetInternalFieldCount(1);
+      tpl->SetClassName(NanNew("SpellCheck"));
 
-      NODE_SET_PROTOTYPE_METHOD(constructor, "check", Check);
+      NODE_SET_PROTOTYPE_METHOD(tpl, "check", Check);
 
-      target->Set(name, constructor->GetFunction());
+      NanAssignPersistent(constructor, tpl->GetFunction());
+      exports->Set(NanNew("SpellCheck"), tpl->GetFunction());
     }
 };
 
 extern "C" {
-  void init(Handle<Object> target) {
-    HandleScope scope;
-    SpellCheck::Initialize(target);
+  void init(Handle<Object> exports) {
+    NanScope();
+    SpellCheck::Initialize(exports);
   }
 
   NODE_MODULE(spellcheck, init);

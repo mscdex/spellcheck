@@ -9,6 +9,9 @@
       'dependencies': [
         'deps/hunspell/binding.gyp:hunspell',
       ],
+      'include_dirs': [
+        "<!(node -e \"require('nan')\")"
+      ],
     },
   ],
 }
