@@ -25,7 +25,8 @@ Examples
   // this example uses the en_US hunspell files from SCOWL:
   //   http://wordlist.sourceforge.net/
   var SpellCheck = require('spellcheck'),
-        base = __dirname + (process.platform === 'win32' ? '\\' : '/'),
+        path = require('path'),
+        base = __dirname + path.sep,
         spell = new SpellCheck(base + 'en_US.aff', base + 'en_US.dic');
 
   spell.check('sain', function(err, correct, suggestions) {
